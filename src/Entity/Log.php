@@ -18,12 +18,12 @@ class Log
     private $id;
 
     /**
-     * @ORM\Column(type="string")
+     * @ORM\Column(type="text")
      */
     private $request;
 
     /**
-     * @ORM\Column(type="string")
+     * @ORM\Column(type="text")
      */
     private $response;
 
@@ -43,13 +43,12 @@ class Log
     private $deletedAt;
 
     /**
-     * @ORM\Column(type="enum_status_default", length=10)
+     * @ORM\Column(type="enum_status_default", length=10, options={"default":"new"})
      */
     private $status = EnumStatusDefaultType::STATUS_NEW;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="logs")
-     * @ORM\JoinColumn(nullable=false)
      */
     private $author;
 

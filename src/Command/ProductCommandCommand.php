@@ -3,7 +3,6 @@
 namespace App\Command;
 
 use App\Doctrine\EnumStatusExtendedType;
-use App\Entity\Product;
 use App\Repository\ProductRepository;
 use App\Service\Notification;
 use Doctrine\ORM\EntityManagerInterface;
@@ -14,8 +13,15 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
+/**
+ * Class ProductCommandCommand
+ * @package App\Command
+ */
 class ProductCommandCommand extends Command
 {
+    /**
+     * @var string
+     */
     protected static $defaultName = 'app:product:command';
     /** @var EntityManagerInterface $em */
     private $em;
@@ -24,6 +30,9 @@ class ProductCommandCommand extends Command
     /** @var Notification $notification */
     private $notification;
 
+    /**
+     *
+     */
     protected function configure()
     {
         $this
@@ -37,6 +46,12 @@ class ProductCommandCommand extends Command
             );
     }
 
+    /**
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return int|void|null
+     * @throws \Exception
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $io = new SymfonyStyle($input, $output);

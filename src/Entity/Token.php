@@ -49,7 +49,7 @@ class Token
     private $author;
 
     /**
-     * @ORM\Column(type="enum_status_default", length=10)
+     * @ORM\Column(type="enum_status_default", length=10, options={"default":"new"})
      */
     private $status = EnumStatusDefaultType::STATUS_NEW;
 

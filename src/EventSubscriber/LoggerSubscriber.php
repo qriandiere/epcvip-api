@@ -5,9 +5,8 @@ namespace App\EventSubscriber;
 use App\Entity\Log;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Container\ContainerInterface;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\HttpKernel\Event\ControllerEvent;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
@@ -17,45 +16,40 @@ use Symfony\Component\HttpKernel\KernelEvents;
  */
 class LoggerSubscriber implements EventSubscriberInterface
 {
-    #@todo https://stackoverflow.com/questions/41183215/how-to-create-a-custom-monolog-file-only-for-users-login-in-symfony
     /** @var EntityManagerInterface $em */
     private $em;
     /** @var ContainerInterface $container */
     private $container;
-    /** @var LoggerInterface $requestLogger */
-    private $requestLogger;
-    /** @var LoggerInterface $responseLogger */
-    private $responseLogger;
 
     /**
      * LoggerSubscriber constructor.
      * @param EntityManagerInterface $em
      * @param ContainerInterface $container
-     * @param LoggerInterface $requestLogger
-     * @param LoggerInterface $responseLogger
      */
     public function __construct(
         EntityManagerInterface $em,
-        ContainerInterface $container,
-        LoggerInterface $requestLogger,
-        LoggerInterface $responseLogger
+        ContainerInterface $container
     )
     {
         $this->em = $em;
         $this->container = $container;
-        $this->requestLogger = $requestLogger;
-        $this->responseLogger = $responseLogger;
     }
 
     /**
-     * @param ControllerEvent $event
+     * @param RequestEvent $event
      */
-    public function onKernelController(ControllerEvent $event)
+    public function onKernelRequest(RequestEvent $event)
     {
-        $request = json_encode($event->getRequest(), true);
+        $request = $event->getRequest();
+        $result = json_encode([
+            'requestUri' => $request->getRequestUri(),
+            'user' => $request->getUser(),
+            'content' => $request->getContent(),
+        ]);
         $log = (new Log())
-            ->setRequest($request);
-        $this->requestLogger->info($request);
+            ->setRequest($result);
+        $logger = $this->container->get('monolog.logger.request');
+        $logger->notice($result);
         $event->getRequest()->getSession()->set('log', $log);
     }
 
@@ -64,13 +58,19 @@ class LoggerSubscriber implements EventSubscriberInterface
      */
     public function onKernelResponse(ResponseEvent $event)
     {
-        $response = json_encode($event->getResponse());
         $log = $event->getRequest()->getSession()->get('log');
+        if ($log === null) return;
+        $response = $event->getResponse();
+        $result = json_encode([
+            'statusCode' => $response->getStatusCode(),
+            'content' => $response->getContent(),
+        ]);
         $log
-            ->setResponse($response);
+            ->setResponse($result);
         $this->em->persist($log);
         $this->em->flush();
-        $this->responseLogger->info($response);
+        $logger = $this->container->get('monolog.logger.response');
+        $logger->notice($result);
     }
 
     /**
@@ -79,8 +79,8 @@ class LoggerSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-//            KernelEvents::CONTROLLER => 'onKernelController',
-//            KernelEvents::RESPONSE => 'onKernelResponse',
+            KernelEvents::REQUEST => 'onKernelRequest',
+            KernelEvents::RESPONSE => 'onKernelResponse',
         ];
     }
 }

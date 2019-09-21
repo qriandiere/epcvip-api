@@ -28,7 +28,7 @@ class Product
 
     /**
      * @Groups({"product", "products"})
-     * @ORM\Column(type="enum_status_extended", length=10)
+     * @ORM\Column(type="enum_status_extended", length=10, options={"default":"new"})
      */
     private $status = EnumStatusDefaultType::STATUS_NEW;
 

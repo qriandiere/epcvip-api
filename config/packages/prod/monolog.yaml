@@ -21,3 +21,11 @@ monolog:
             handler: deprecation
             max_level: info
             channels: ["php"]
+        request:
+            type: rotating_file
+            path: "%kernel.logs_dir%/%kernel.environment%_request.log"
+            channels: ['request']
+        response:
+            type: rotating_file
+            path: "%kernel.logs_dir%/%kernel.environment%_response.log"
+            channels: ['response']

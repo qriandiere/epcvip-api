@@ -41,7 +41,7 @@ class Customer
 
     /**
      * @Groups({"customer", "customers"})
-     * @ORM\Column(type="enum_status_extended", length=10)
+     * @ORM\Column(type="enum_status_extended", length=10, options={"default":"new"})
      */
     private $status = EnumStatusDefaultType::STATUS_NEW;
 
@@ -64,7 +64,12 @@ class Customer
 
     /**
      * @Groups({"products"})
-     * @ORM\OneToMany(targetEntity="App\Entity\Product", mappedBy="customer", orphanRemoval=true, cascade={"PERSIST", "REMOVE"})
+     * @ORM\OneToMany(
+     *     targetEntity="App\Entity\Product",
+     *     mappedBy="customer",
+     *     orphanRemoval=true,
+     *     cascade={"PERSIST", "REMOVE"}
+     * )
      */
     private $products;
 

@@ -7,6 +7,10 @@ use App\Repository\TokenRepository;
 use App\Service\Token;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
+/**
+ * Class AuthenticationTest
+ * @package App\Tests
+ */
 class AuthenticationTest extends TestCase
 {
     /**
@@ -35,7 +39,7 @@ class AuthenticationTest extends TestCase
          */
         $client->request(
             'GET',
-            '/authentication/login'
+            '/authentication/login',
             [],
             [],
             [
