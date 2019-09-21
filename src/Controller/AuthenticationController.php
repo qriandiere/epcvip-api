@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Repository\TokenRepository;
 use App\Repository\UserRepository;
 use App\Service\Token;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -28,7 +29,8 @@ class AuthenticationController extends AbstractController
         UserRepository $userRepository,
         UserPasswordEncoder $userPasswordEncoder,
         Token $token,
-        Request $request
+        Request $request,
+        TokenRepository $tokenRepository
     )
     {
         if ($request->getUser() === null or $request->getPassword() === null) {
@@ -43,7 +45,8 @@ class AuthenticationController extends AbstractController
                 JsonResponse::HTTP_UNAUTHORIZED,
                 'Username or password invalid'
             );
-        $authenticationToken = $token->new($user, Token::AUTHENTICATION);
+        $authenticationToken = $tokenRepository->findOneBy(['user' => $user, 'type' => Token::AUTHENTICATION]);
+        if ($authenticationToken === null) $authenticationToken = $token->new($user, Token::AUTHENTICATION);
         return new JsonResponse(
             $authenticationToken->getValue(),
             JsonResponse::HTTP_OK
