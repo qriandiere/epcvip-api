@@ -60,8 +60,7 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
      */
     public function joinColumnName($propertyName)
     {
-        return $this->camelCase($propertyName, false) .
-            $this->camelCase($this->referenceColumnName(), false);
+        return $this->camelCase($propertyName, false) . ucfirst($this->referenceColumnName());
     }
 
     /**
