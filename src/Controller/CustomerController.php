@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Customer;
+use App\Exception\ApiException;
 use App\Form\CustomerType;
 use App\Repository\CustomerRepository;
 use App\Service\Serializer;
@@ -18,19 +19,17 @@ use Symfony\Component\Routing\Annotation\Route;
 class CustomerController extends AbstractController
 {
     /**
-     * @param Serializer $serializer
      * @param Request $request
      * @return JsonResponse
      * @throws \Exception
      * @Route("", name="new", methods={"POST"})
      */
     public function new(
-        Serializer $serializer,
         Request $request
     )
     {
         $em = $this->getDoctrine()->getManager();
-        $data = $serializer->deserialize($request->getContent());
+        $data = json_decode($request->getContent(), true);
         $customer = new Customer();
         $form = $this->createForm(CustomerType::class, $customer);
         $form->submit($data);

@@ -39,7 +39,8 @@ class Token
     {
         $token = (new \App\Entity\Token())
             ->setValue(sha1(uniqid() . time() . $user->getId()))
-            ->setType($type);
+            ->setType($type)
+            ->setAuthor($user);
         $this->em->persist($token);
         $this->em->flush();
         return $token;

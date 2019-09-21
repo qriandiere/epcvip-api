@@ -16,7 +16,7 @@ class Product
     /**
      * @Groups({"product", "products"})
      * @ORM\Id()
-     * @ORM\Column(type="string", length=13)
+     * @ORM\Column(type="string", length=14)
      */
     private $issn;
 
@@ -45,7 +45,6 @@ class Product
     private $updatedAt;
 
     /**
-     * @Groups({"product", "products"})
      * @ORM\Column(type="datetime", nullable=true)
      */
     private $deletedAt;

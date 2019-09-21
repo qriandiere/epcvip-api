@@ -58,11 +58,8 @@ class EntityListener
             return $this->container->get('security.token_storage')->getToken()->getUser();
         } else if ($object instanceof User) {
             return $object;
-        } else if ($object instanceof Notification) {
-            return null;
         }
-        // For fixtures
-        return $this->userRepository->find(1);
+        return null;
     }
 
     /**
@@ -72,15 +69,17 @@ class EntityListener
     public function preFlush(PreFlushEventArgs $event)
     {
         $em = $event->getEntityManager();
-        $now =  new \DateTime();
+        $now = new \DateTime();
         foreach ($event->getEntityManager()->getUnitOfWork()->getScheduledEntityInsertions() as $object) {
             $author = $this->getUser($object);
             if ($author !== null)
                 $object
                     ->setAuthor($author);
             $object
-                ->setCreatedAt($now)
-                ->setStatus(EnumStatusDefaultType::STATUS_NEW);
+                ->setCreatedAt($now);
+            if($object->getStatus() === null)
+                $object
+                    ->setStatus(EnumStatusDefaultType::STATUS_NEW);
             $em->merge($object);
             $em->persist($object);
         }

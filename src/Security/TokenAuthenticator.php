@@ -65,7 +65,7 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
         }
         $token = $this->em->getRepository(Token::class)->findOneBy(['value' => $value]);
         // if a User object, checkCredentials() is called
-        return $token === null ? null : $token->getUser();
+        return $token === null ? null : $token->getAuthor();
     }
 
     /**
@@ -90,7 +90,7 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
             'message' => strtr($exception->getMessageKey(), $exception->getMessageData())
         ];
 
-        return new JsonResponse($data, Response::HTTP_FORBIDDEN);
+        return new JsonResponse($data, Response::HTTP_UNAUTHORIZED);
     }
 
     /**

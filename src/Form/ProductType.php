@@ -24,12 +24,12 @@ class ProductType extends AbstractType
         $builder
             ->add('issn', TextType::class, [
                 'constraints' => [
-                    new Length(['min' => 13, 'max' => 13])
+                    new Length(['min' => 14, 'max' => 14])
                 ]
             ])
             ->add('name', TextType::class, [
                 'constraints' => [
-                    new Length(['min' => 13, 'max' => 13])
+                    new Length(['min' => 2, 'max' => 255])
                 ]
             ]);
     }

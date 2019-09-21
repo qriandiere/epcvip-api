@@ -25,7 +25,8 @@ class SampleFixtures extends Fixture
     private $em;
     /** @var \DateTime $now */
     private $now;
-
+    /** @var User $author */
+    private $author;
     /**
      *
      */
@@ -125,11 +126,14 @@ class SampleFixtures extends Fixture
             ->setCreatedAt($this->now)
             ->setStatus(EnumStatusDefaultType::STATUS_ACTIVE);
         $password = $this->passwordEncoder->encodePassword(
-            $user, 'user_' . $i . '_password'
+            $user, 'password'
         );
         $user
             ->setPassword($password);
         $this->em->persist($user);
+        if ($i === 1) {
+            $this->author = $user;
+        }
     }
 
     /**
@@ -139,14 +143,14 @@ class SampleFixtures extends Fixture
     {
         for ($i = 1; $i <= self::COUNTS['customers']; $i++) {
             //Only 28 days so we're sure to not have invalid dates
-            $dateOfBirth = rand(1950 - 2000) . '-' . rand(1, 12) . '-' . rand(1, 28);
+            $dateOfBirth = rand(1950, 2000) . '-' . rand(1, 12) . '-' . rand(1, 28);
             $customer = (new Customer())
                 ->setDateOfBirth(new \DateTime($dateOfBirth))
-                ->setFirstName(self::FIRST_NAMES[rand(0, count(self::FIRST_NAMES))])
-                ->setLastName(self::LAST_NAMES[rand(0, count(self::FIRST_NAMES))])
-                ->setUuid("ecpvip-uuid-$i")
+                ->setFirstName(self::FIRST_NAMES[rand(0, count(self::FIRST_NAMES) - 1)])
+                ->setLastName(self::LAST_NAMES[rand(0, count(self::FIRST_NAMES) - 1)])
                 ->setCreatedAt($this->now)
-                ->setStatus(EnumStatusExtendedType::STATUS_NEW);
+                ->setStatus(EnumStatusExtendedType::STATUS_NEW)
+                ->setAuthor($this->author);
             $this->em->persist($customer);
             $this->products($customer);
         }
@@ -162,24 +166,30 @@ class SampleFixtures extends Fixture
             $group1 = rand(1000, 9999);
             $group2 = rand(1000, 9999);
             $product = (new Product())
-                ->setName(self::PRODUCT_NAMES[rand(0, count(self::PRODUCT_NAMES))])
+                ->setName(self::PRODUCT_NAMES[rand(0, count(self::PRODUCT_NAMES) - 1)])
                 ->setIssn('issn-' . $group1 . '-' . $group2)
                 ->setCustomer($customer)
                 ->setCreatedAt($this->now)
-                ->setStatus(EnumStatusExtendedType::STATUS_NEW);
+                ->setStatus(EnumStatusExtendedType::STATUS_NEW)
+                ->setAuthor($this->author);
             $this->em->persist($product);
         }
     }
 
     /**
      * @param ObjectManager $manager
+     * @throws \Exception
      */
     public function load(ObjectManager $manager)
     {
         $this->em = $manager;
         $this->users();
+        $manager->flush();
         $this->reviewers();
+        $manager->flush();
         $this->admins();
+        $manager->flush();
+        $this->customers();
         $manager->flush();
     }
 }

@@ -15,8 +15,9 @@ class Customer
 {
     /**
      * @Groups({"customer", "customers"})
+     * @ORM\GeneratedValue()
      * @ORM\Id()
-     * @ORM\Column(type="string", length=180, unique=true)
+     * @ORM\Column(type="integer")
      */
     private $uuid;
 
@@ -57,14 +58,13 @@ class Customer
     private $updatedAt;
 
     /**
-     * @Groups({"customer", "customers"})
      * @ORM\Column(type="datetime", nullable=true)
      */
-    private $deleteAt;
+    private $deletedAt;
 
     /**
      * @Groups({"products"})
-     * @ORM\OneToMany(targetEntity="App\Entity\Product", mappedBy="customer", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity="App\Entity\Product", mappedBy="customer", orphanRemoval=true, cascade={"PERSIST", "REMOVE"})
      */
     private $products;
 
@@ -208,25 +208,6 @@ class Customer
     /**
      * @return \DateTimeInterface|null
      */
-    public function getDeleteAt(): ?\DateTimeInterface
-    {
-        return $this->deleteAt;
-    }
-
-    /**
-     * @param \DateTimeInterface|null $deleteAt
-     * @return $this
-     */
-    public function setDeleteAt(?\DateTimeInterface $deleteAt): self
-    {
-        $this->deleteAt = $deleteAt;
-
-        return $this;
-    }
-
-    /**
-     * @return \DateTimeInterface|null
-     */
     public function getUpdatedAt(): ?\DateTimeInterface
     {
         return $this->updatedAt;
@@ -290,6 +271,18 @@ class Customer
     public function setAuthor(?User $author): self
     {
         $this->author = $author;
+
+        return $this;
+    }
+
+    public function getDeletedAt(): ?\DateTimeInterface
+    {
+        return $this->deletedAt;
+    }
+
+    public function setDeletedAt(?\DateTimeInterface $deletedAt): self
+    {
+        $this->deletedAt = $deletedAt;
 
         return $this;
     }

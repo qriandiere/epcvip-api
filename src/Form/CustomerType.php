@@ -6,6 +6,7 @@ use App\Entity\Customer;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\BirthdayType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -37,8 +38,10 @@ class CustomerType extends AbstractType
                 ]
             ])
             // Only adult are authorized
-            ->add('dateOfBirth', BirthdayType::class, [
-                'constraints'=>[
+            ->add('dateOfBirth', DateType::class, [
+                'widget' => 'single_text',
+                'format' => 'yyyy-MM-dd',
+                'constraints' => [
                     new Date(),
                     new GreaterThan('-18 years')
                 ]
@@ -46,7 +49,8 @@ class CustomerType extends AbstractType
             ->add('products', CollectionType::class, [
                 'entry_type' => ProductType::class,
                 'allow_add' => true,
-                'allow_delete' => true
+                'allow_delete' => true,
+                'by_reference' => false
             ]);
     }
 
