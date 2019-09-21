@@ -34,6 +34,7 @@ class Notification
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Product", inversedBy="notifications")
+     * @ORM\JoinColumn(referencedColumnName="issn")
      */
     private $product;
 

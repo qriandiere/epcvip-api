@@ -2,6 +2,8 @@
 
 namespace App\Doctrine;
 
+use function Couchbase\defaultDecoder;
+
 /**
  * Class NamingStrategy
  * @package App\Doctrine
@@ -16,9 +18,12 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
      * (example : customers represent all of our customers)
      * We also keep camelCase in our table names to be coherent with our columns naming.
      */
-    function classToTableName($className)
+    public function classToTableName($className)
     {
-        return lcfirst($className) . 's';
+        if (strpos($className, '\\') !== false) {
+            $className = substr($className, strrpos($className, '\\') + 1);
+        }
+        return $this->camelCase($className, true);
     }
 
     /**
@@ -27,9 +32,9 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
      * @return string
      * No modification to do, our column are in camelCase just like our entity properties
      */
-    function propertyToColumnName($propertyName, $className = null)
+    public function propertyToColumnName($propertyName, $className = null)
     {
-        return $propertyName;
+        return $this->camelCase($propertyName, false);
     }
 
     /**
@@ -37,25 +42,25 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
      * @param string $embeddedColumnName
      * @param null $className
      * @param null $embeddedClassName
-     * @return string|void
+     * @return string
      */
-    function embeddedFieldToColumnName($propertyName, $embeddedColumnName, $className = null, $embeddedClassName = null)
+    public function embeddedFieldToColumnName($propertyName, $embeddedColumnName, $className = null, $embeddedClassName = null)
     {
+        return $this->camelCase($propertyName, false) . ucfirst($embeddedColumnName);
     }
 
-    /**
-     * @return string|void
-     */
-    function referenceColumnName()
+    public function referenceColumnName()
     {
+        return 'id';
     }
 
     /**
      * @param string $propertyName
      * @return string
      */
-    function joinColumnName($propertyName)
+    public function joinColumnName($propertyName)
     {
+        return $this->camelCase($propertyName, false) . $this->referenceColumnName();
     }
 
     /**
@@ -64,8 +69,9 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
      * @param null $propertyName
      * @return string|void
      */
-    function joinTableName($sourceEntity, $targetEntity, $propertyName = null)
+    public function joinTableName($sourceEntity, $targetEntity, $propertyName = null)
     {
+        return $this->classToTableName($sourceEntity) . ucfirst($this->classToTableName($targetEntity));
     }
 
     /**
@@ -73,7 +79,19 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
      * @param null $referencedColumnName
      * @return string|void
      */
-    function joinKeyColumnName($entityName, $referencedColumnName = null)
+    public function joinKeyColumnName($entityName, $referencedColumnName = null)
     {
+        return $this->classToTableName($entityName) . ($referencedColumnName ?: ucfirst($this->referenceColumnName()));
+    }
+
+    /**
+     * @param string $string
+     * @param bool $plural
+     * @return string
+     */
+    private function camelCase(string $string, bool $plural)
+    {
+        $string = lcfirst($string);
+        return $plural ? $string . 's' : $string;
     }
 }
