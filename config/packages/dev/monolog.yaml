@@ -1,19 +1,23 @@
 monolog:
+    #Todo apply to prod when working
+    channels: ['request', 'response']
     handlers:
         main:
             type: stream
             path: "%kernel.logs_dir%/%kernel.environment%.log"
             level: debug
             channels: ["!event"]
-        # uncomment to get logging in your browser
-        # you may have to allow bigger header sizes in your Web server configuration
-        #firephp:
-        #    type: firephp
-        #    level: info
-        #chromephp:
-        #    type: chromephp
-        #    level: info
         console:
             type: console
             process_psr_3_messages: false
             channels: ["!event", "!doctrine", "!console"]
+        request:
+            level: debug
+            type: rotating_file
+            path: "%kernel.logs_dir%/%kernel.environment%_request.log"
+            channels: ['request']
+        response:
+            level: debug
+            type: rotating_file
+            path: "%kernel.logs_dir%/%kernel.environment%_response.log"
+            channels: ['response']

@@ -9,10 +9,19 @@ doctrine:
             collate: utf8mb4_unicode_ci
 
         url: '%env(resolve:DATABASE_URL)%'
+        mapping_types:
+            enum: string
     orm:
         auto_generate_proxy_classes: true
-        naming_strategy: doctrine.orm.naming_strategy.underscore
+        naming_strategy: app.naming_strategy
         auto_mapping: true
+        types:
+            enum_status_default:  App\Doctrine\EnumStatusDefaultType
+            enum_status_extended:  App\Doctrine\EnumStatusExtendedType
+        filters:
+            deleted:
+                class: 'App\Doctrine\Filter'
+                enabled: true
         mappings:
             App:
                 is_bundle: false
