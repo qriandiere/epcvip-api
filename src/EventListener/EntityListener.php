@@ -4,6 +4,7 @@ namespace App\EventListener;
 
 use App\Doctrine\EnumStatusDefaultType;
 use App\Entity\User;
+use App\Repository\UserRepository;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Event\PreFlushEventArgs;
@@ -19,15 +20,20 @@ class EntityListener
     const WORKFLOW_TRANSITION_DELETED = 'delete';
     /* @var ContainerInterface $container */
     private $container;
+    /** @var UserRepository $userRepository */
+    private $userRepository;
 
     /**
-     * LogListener constructor.
+     * EntityListener constructor.
      * @param ContainerInterface $container
+     * @param UserRepository $userRepository
      */
-    public function __construct(ContainerInterface $container)
+    public function __construct(ContainerInterface $container, UserRepository $userRepository)
     {
         $this->container = $container;
+        $this->userRepository = $userRepository;
     }
+
 
     /**
      * @param $object
@@ -45,8 +51,8 @@ class EntityListener
         } else if ($object instanceof User) {
             return $object;
         }
-        //@todo API exception
-        throw new \Exception('User must be logged in !', 400);
+        // For fixtures
+        return $this->userRepository->find(1);
     }
 
     /**
@@ -82,7 +88,6 @@ class EntityListener
         $now = new \DateTime();
         $em = $event->getEntityManager();
         foreach ($event->getEntityManager()->getUnitOfWork()->getScheduledEntityInsertions() as $object) {
-            $author = $this->getUser($object);
             $object
                 ->setAuthor($author)
                 ->setCreatedAt($now)

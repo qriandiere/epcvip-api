@@ -3,18 +3,26 @@
 namespace App\DataFixtures;
 
 use App\Entity\Customer;
+use App\Entity\Product;
 use App\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Security\Core\Encoder\PasswordEncoderInterface;
 
+/**
+ * Class SampleFixtures
+ * @package App\DataFixtures
+ */
 class SampleFixtures extends Fixture
 {
     /** @var PasswordEncoderInterface $passwordEncoder */
     private $passwordEncoder;
     /** @var EntityManagerInterface $em */
     private $em;
+    /**
+     *
+     */
     const FIRST_NAMES = [
         'James',
         'Tom',
@@ -25,6 +33,9 @@ class SampleFixtures extends Fixture
         'Pierre',
         'Paul'
     ];
+    /**
+     *
+     */
     const LAST_NAMES = [
         'Dean',
         'Brady',
@@ -35,6 +46,9 @@ class SampleFixtures extends Fixture
         'Dupont',
         'Dupuis'
     ];
+    /**
+     *
+     */
     const COUNTS = [
         'users_user' => 10,
         'users_reviewer' => 2,
@@ -42,9 +56,21 @@ class SampleFixtures extends Fixture
         'customers' => 10,
         'products_by_customer' => 2
     ];
+    /**
+     *
+     */
+    const PRODUCT_NAMES = [
+        'billboard',
+        'magazine',
+        'tv',
+        'internet'
+    ];
 
     #@todo unit testing
 
+    /**
+     *
+     */
     private function users()
     {
         for ($i = 1; $i <= self::COUNTS['users_user']; $i++) {
@@ -52,6 +78,9 @@ class SampleFixtures extends Fixture
         }
     }
 
+    /**
+     *
+     */
     private function reviewers()
     {
         for ($i = 1; $i <= self::COUNTS['users_reviewer']; $i++) {
@@ -59,6 +88,9 @@ class SampleFixtures extends Fixture
         }
     }
 
+    /**
+     *
+     */
     private function admins()
     {
         for ($i = 1; $i <= self::COUNTS['users_admin']; $i++) {
@@ -66,6 +98,10 @@ class SampleFixtures extends Fixture
         }
     }
 
+    /**
+     * @param string $role
+     * @param int $i
+     */
     private function user(string $role, int $i)
     {
         $password = $this->passwordEncoder->encodePassword(
@@ -78,6 +114,9 @@ class SampleFixtures extends Fixture
         $this->em->persist($user);
     }
 
+    /**
+     * @throws \Exception
+     */
     private function customers()
     {
         for ($i = 1; $i <= self::COUNTS['customers']; $i++) {
@@ -88,11 +127,31 @@ class SampleFixtures extends Fixture
                 ->setFirstName(self::FIRST_NAMES[rand(0, count(self::FIRST_NAMES))])
                 ->setLastName(self::LAST_NAMES[rand(0, count(self::FIRST_NAMES))])
                 ->setUuid("ecpvip-uuid-$i");
+            $this->em->persist($customer);
+            $this->products($customer);
+        }
+        $this->em->flush();
+    }
+
+    /**
+     * @param Customer $customer
+     */
+    private function products(Customer $customer)
+    {
+        for ($i = 1; $i <= self::COUNTS['products_by_customer']; $i++) {
+            $group1 = rand(1000, 9999);
+            $group2 = rand(1000, 9999);
+            $product = (new Product())
+                ->setName(self::PRODUCT_NAMES[rand(0, count(self::PRODUCT_NAMES))])
+                ->setIssn('issn-' . $group1 . '-' . $group2)
+                ->setCustomer($customer);
+            $this->em->persist($product);
         }
     }
 
-    
-
+    /**
+     * @param ObjectManager $manager
+     */
     public function load(ObjectManager $manager)
     {
         $this->em = $manager;
