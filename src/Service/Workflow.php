@@ -44,17 +44,12 @@ class Workflow
     )
     {
         $workflow = $this->registry->get($object);
-        if (!in_array($transition, $workflow->getDefinition()->getTransitions()))
-            throw new ApiException(
-                JsonResponse::HTTP_BAD_REQUEST,
-                'Invalid transition'
-            );
         if (!$workflow->can($object, $transition) or !$this->security->isGranted($transition, $object))
             throw new ApiException(
                 JsonResponse::HTTP_FORBIDDEN,
                 'Transition forbidden'
             );
-        $workflow->apply($transition, $object);
+        $workflow->apply($object, $transition);
         $this->em->persist($object);
         $this->em->flush();
         return $object;

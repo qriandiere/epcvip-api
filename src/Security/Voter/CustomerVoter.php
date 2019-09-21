@@ -185,8 +185,8 @@ class CustomerVoter extends Voter
      */
     private function canEdit(Customer $customer, UserInterface $user)
     {
-        //logic goes here
-        return true;
+        //Allow an admin or the author
+        return $this->security->isGranted('ROLE_ADMIN') or $user === $customer->getAuthor();
     }
 
     /**

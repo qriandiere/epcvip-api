@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Doctrine\EnumStatusExtendedType;
 use App\Entity\Customer;
 use App\Form\CustomerType;
 use App\Repository\CustomerRepository;
@@ -33,6 +34,13 @@ class CustomerController extends AbstractController
         $form = $this->createForm(CustomerType::class, $customer);
         $form->submit($data);
         $this->denyAccessUnlessGranted('create', $customer);
+        //When we create a new customer, it is already set in pending status
+        $customer
+            ->setStatus(EnumStatusExtendedType::STATUS_PENDING);
+        foreach ($customer->getProducts() as $product) {
+            $product
+                ->setStatus(EnumStatusExtendedType::STATUS_PENDING);
+        }
         $em->persist($customer);
         $em->flush();
         return new JsonResponse(
@@ -70,20 +78,21 @@ class CustomerController extends AbstractController
 
     /**
      * @param Customer $customer
-     * @param string $transition
      * @param Serializer $serializer
      * @param Workflow $workflow
+     * @param Request $request
      * @return JsonResponse
      * @throws \Exception
-     * @Route("/{id}/status", name="status", requirements={"id": "\d+", "transition": "\w+"})
+     * @Route("/{id}/status", name="status", requirements={"id": "\d+"})
      */
     public function status(
         Customer $customer,
-        string $transition,
         Serializer $serializer,
-        Workflow $workflow
+        Workflow $workflow,
+        Request $request
     )
     {
+        $transition = $request->get('transition');
         $customer = $workflow->transition($transition, $customer);
         return new JsonResponse(
             $serializer->serialize($customer, ['customer']),
