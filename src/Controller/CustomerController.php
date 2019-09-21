@@ -64,7 +64,7 @@ class CustomerController extends AbstractController
     )
     {
         $em = $this->getDoctrine()->getManager();
-        $data = $serializer->deserialize($request->getContent());
+        $data = json_decode($request->getContent(), true);
         $form = $this->createForm(CustomerType::class, $customer);
         $form->submit($data);
         $this->denyAccessUnlessGranted('edit', $customer);
