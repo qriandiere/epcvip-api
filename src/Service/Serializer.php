@@ -72,7 +72,7 @@ class Serializer
         if (!in_array($format, self::SERIALIZATION_SUPPORTED_FORMAT))
             throw new HttpException(
                 JsonResponse::HTTP_BAD_REQUEST,
-                "The format '$format' is currently not supported by the serializer",
+                "The format '$format' is currently not supported by the serializer"
             );
         //We always return the author of a record
         if (!isset($groups['user'])) $groups[] = 'user';
@@ -90,7 +90,7 @@ class Serializer
         if (!in_array($format, self::SERIALIZATION_SUPPORTED_FORMAT))
             throw new HttpException(
                 JsonResponse::HTTP_BAD_REQUEST,
-                "The format '$format' is currently not supported by the serializer",
+                "The format '$format' is currently not supported by the serializer"
             );
         return $this->serializer->deserialize($data, $format, $format);
     }

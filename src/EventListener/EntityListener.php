@@ -3,6 +3,7 @@
 namespace App\EventListener;
 
 use App\Doctrine\EnumStatusDefaultType;
+use App\Entity\Notification;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -52,6 +53,8 @@ class EntityListener
             return $this->container->get('security.token_storage')->getToken()->getUser();
         } else if ($object instanceof User) {
             return $object;
+        } else if ($object instanceof Notification) {
+            return null;
         }
         // For fixtures
         return $this->userRepository->find(1);
@@ -93,8 +96,10 @@ class EntityListener
         $em = $event->getEntityManager();
         foreach ($event->getEntityManager()->getUnitOfWork()->getScheduledEntityInsertions() as $object) {
             $author = $this->getUser($object);
+            if ($author !== null)
+                $object
+                    ->setAuthor($author);
             $object
-                ->setAuthor($author)
                 ->setCreatedAt($now)
                 ->setStatus(EnumStatusDefaultType::STATUS_NEW);
             $em->merge($object);

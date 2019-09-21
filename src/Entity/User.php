@@ -75,12 +75,24 @@ class User implements UserInterface
      */
     private $status;
 
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Notification", mappedBy="author")
+     */
+    private $notifications;
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Notification", mappedBy="user", orphanRemoval=true)
+     */
+    private $notificationsUser;
+
     public function __construct()
     {
         $this->tokens = new ArrayCollection();
         $this->customers = new ArrayCollection();
         $this->products = new ArrayCollection();
         $this->logs = new ArrayCollection();
+        $this->notifications = new ArrayCollection();
+        $this->notificationsUser = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -324,6 +336,68 @@ class User implements UserInterface
     public function setStatus(string $status): self
     {
         $this->status = $status;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Notification[]
+     */
+    public function getNotifications(): Collection
+    {
+        return $this->notifications;
+    }
+
+    public function addNotification(Notification $notification): self
+    {
+        if (!$this->notifications->contains($notification)) {
+            $this->notifications[] = $notification;
+            $notification->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeNotification(Notification $notification): self
+    {
+        if ($this->notifications->contains($notification)) {
+            $this->notifications->removeElement($notification);
+            // set the owning side to null (unless already changed)
+            if ($notification->getAuthor() === $this) {
+                $notification->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Notification[]
+     */
+    public function getNotificationsUser(): Collection
+    {
+        return $this->notificationsUser;
+    }
+
+    public function addNotificationsUser(Notification $notificationsUser): self
+    {
+        if (!$this->notificationsUser->contains($notificationsUser)) {
+            $this->notificationsUser[] = $notificationsUser;
+            $notificationsUser->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeNotificationsUser(Notification $notificationsUser): self
+    {
+        if ($this->notificationsUser->contains($notificationsUser)) {
+            $this->notificationsUser->removeElement($notificationsUser);
+            // set the owning side to null (unless already changed)
+            if ($notificationsUser->getUser() === $this) {
+                $notificationsUser->setUser(null);
+            }
+        }
 
         return $this;
     }

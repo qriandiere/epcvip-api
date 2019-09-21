@@ -11,13 +11,13 @@ doctrine:
         url: '%env(resolve:DATABASE_URL)%'
         mapping_types:
             enum: string
+        types:
+            enum_status_default:  App\Doctrine\EnumStatusDefaultType
+            enum_status_extended:  App\Doctrine\EnumStatusExtendedType
     orm:
         auto_generate_proxy_classes: true
         naming_strategy: app.naming_strategy
         auto_mapping: true
-        types:
-            enum_status_default:  App\Doctrine\EnumStatusDefaultType
-            enum_status_extended:  App\Doctrine\EnumStatusExtendedType
         filters:
             deleted:
                 class: 'App\Doctrine\Filter'
