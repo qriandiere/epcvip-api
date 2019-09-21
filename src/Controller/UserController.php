@@ -29,6 +29,6 @@ class UserController extends AbstractController
         return new JsonResponse(
             $serializer->serialize($user, ['user']),
             JsonResponse::HTTP_OK
-        )
+        );
     }
 }

@@ -18,8 +18,6 @@ use Symfony\Component\HttpKernel\KernelEvents;
 class LoggerSubscriber implements EventSubscriberInterface
 {
     #@todo https://stackoverflow.com/questions/41183215/how-to-create-a-custom-monolog-file-only-for-users-login-in-symfony
-    /** @var Log $log */
-    private $log;
     /** @var EntityManagerInterface $em */
     private $em;
     /** @var ContainerInterface $container */
@@ -58,7 +56,7 @@ class LoggerSubscriber implements EventSubscriberInterface
         $log = (new Log())
             ->setRequest($request);
         $this->requestLogger->info($request);
-        $this->log = $log;
+        $event->getRequest()->getSession()->set('log', $log);
     }
 
     /**
@@ -67,9 +65,10 @@ class LoggerSubscriber implements EventSubscriberInterface
     public function onKernelResponse(ResponseEvent $event)
     {
         $response = json_encode($event->getResponse());
-        $this->log
+        $log = $event->getRequest()->getSession()->get('log');
+        $log
             ->setResponse($response);
-        $this->em->persist($this->log);
+        $this->em->persist($log);
         $this->em->flush();
         $this->responseLogger->info($response);
     }
@@ -80,8 +79,8 @@ class LoggerSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            KernelEvents::CONTROLLER => 'onKernelController',
-            KernelEvents::RESPONSE => 'onKernelResponse',
+//            KernelEvents::CONTROLLER => 'onKernelController',
+//            KernelEvents::RESPONSE => 'onKernelResponse',
         ];
     }
 }

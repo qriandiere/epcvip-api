@@ -6,13 +6,15 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
  */
-class User implements UserInterface
+class User implements UserInterface, \Serializable
 {
     /**
+     * @Groups({"user", "users"})
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
@@ -20,11 +22,13 @@ class User implements UserInterface
     private $id;
 
     /**
+     * @Groups({"user", "users"})
      * @ORM\Column(type="string", length=180, unique=true)
      */
     private $username;
 
     /**
+     * @Groups({"user", "users"})
      * @ORM\Column(type="json")
      */
     private $roles = [];
@@ -56,21 +60,25 @@ class User implements UserInterface
     private $logs;
 
     /**
+     * @Groups({"user", "users"})
      * @ORM\Column(type="datetime")
      */
     private $createdAt;
 
     /**
+     * @Groups({"user", "users"})
      * @ORM\Column(type="datetime", nullable=true)
      */
     private $updatedAt;
 
     /**
+     * @Groups({"user", "users"})
      * @ORM\Column(type="datetime", nullable=true)
      */
     private $deletedAt;
 
     /**
+     * @Groups({"user", "users"})
      * @ORM\Column(type="enum_status_default", length=10)
      */
     private $status;
@@ -85,6 +93,9 @@ class User implements UserInterface
      */
     private $notificationsUser;
 
+    /**
+     * User constructor.
+     */
     public function __construct()
     {
         $this->tokens = new ArrayCollection();
@@ -95,6 +106,9 @@ class User implements UserInterface
         $this->notificationsUser = new ArrayCollection();
     }
 
+    /**
+     * @return int|null
+     */
     public function getId(): ?int
     {
         return $this->id;
@@ -107,9 +121,13 @@ class User implements UserInterface
      */
     public function getUsername(): string
     {
-        return (string) $this->username;
+        return (string)$this->username;
     }
 
+    /**
+     * @param string $username
+     * @return $this
+     */
     public function setUsername(string $username): self
     {
         $this->username = $username;
@@ -129,6 +147,10 @@ class User implements UserInterface
         return array_unique($roles);
     }
 
+    /**
+     * @param array $roles
+     * @return $this
+     */
     public function setRoles(array $roles): self
     {
         $this->roles = $roles;
@@ -141,9 +163,13 @@ class User implements UserInterface
      */
     public function getPassword(): string
     {
-        return (string) $this->password;
+        return (string)$this->password;
     }
 
+    /**
+     * @param string $password
+     * @return $this
+     */
     public function setPassword(string $password): self
     {
         $this->password = $password;
@@ -176,6 +202,10 @@ class User implements UserInterface
         return $this->tokens;
     }
 
+    /**
+     * @param Token $token
+     * @return $this
+     */
     public function addToken(Token $token): self
     {
         if (!$this->tokens->contains($token)) {
@@ -186,6 +216,10 @@ class User implements UserInterface
         return $this;
     }
 
+    /**
+     * @param Token $token
+     * @return $this
+     */
     public function removeToken(Token $token): self
     {
         if ($this->tokens->contains($token)) {
@@ -207,6 +241,10 @@ class User implements UserInterface
         return $this->customers;
     }
 
+    /**
+     * @param Customer $customer
+     * @return $this
+     */
     public function addCustomer(Customer $customer): self
     {
         if (!$this->customers->contains($customer)) {
@@ -217,6 +255,10 @@ class User implements UserInterface
         return $this;
     }
 
+    /**
+     * @param Customer $customer
+     * @return $this
+     */
     public function removeCustomer(Customer $customer): self
     {
         if ($this->customers->contains($customer)) {
@@ -238,6 +280,10 @@ class User implements UserInterface
         return $this->products;
     }
 
+    /**
+     * @param Product $product
+     * @return $this
+     */
     public function addProduct(Product $product): self
     {
         if (!$this->products->contains($product)) {
@@ -248,6 +294,10 @@ class User implements UserInterface
         return $this;
     }
 
+    /**
+     * @param Product $product
+     * @return $this
+     */
     public function removeProduct(Product $product): self
     {
         if ($this->products->contains($product)) {
@@ -269,6 +319,10 @@ class User implements UserInterface
         return $this->logs;
     }
 
+    /**
+     * @param Log $log
+     * @return $this
+     */
     public function addLog(Log $log): self
     {
         if (!$this->logs->contains($log)) {
@@ -279,6 +333,10 @@ class User implements UserInterface
         return $this;
     }
 
+    /**
+     * @param Log $log
+     * @return $this
+     */
     public function removeLog(Log $log): self
     {
         if ($this->logs->contains($log)) {
@@ -292,11 +350,18 @@ class User implements UserInterface
         return $this;
     }
 
+    /**
+     * @return \DateTimeInterface|null
+     */
     public function getCreatedAt(): ?\DateTimeInterface
     {
         return $this->createdAt;
     }
 
+    /**
+     * @param \DateTimeInterface $createdAt
+     * @return $this
+     */
     public function setCreatedAt(\DateTimeInterface $createdAt): self
     {
         $this->createdAt = $createdAt;
@@ -304,11 +369,18 @@ class User implements UserInterface
         return $this;
     }
 
+    /**
+     * @return \DateTimeInterface|null
+     */
     public function getUpdatedAt(): ?\DateTimeInterface
     {
         return $this->updatedAt;
     }
 
+    /**
+     * @param \DateTimeInterface|null $updatedAt
+     * @return $this
+     */
     public function setUpdatedAt(?\DateTimeInterface $updatedAt): self
     {
         $this->updatedAt = $updatedAt;
@@ -316,11 +388,18 @@ class User implements UserInterface
         return $this;
     }
 
+    /**
+     * @return \DateTimeInterface|null
+     */
     public function getDeletedAt(): ?\DateTimeInterface
     {
         return $this->deletedAt;
     }
 
+    /**
+     * @param \DateTimeInterface|null $deletedAt
+     * @return $this
+     */
     public function setDeletedAt(?\DateTimeInterface $deletedAt): self
     {
         $this->deletedAt = $deletedAt;
@@ -328,11 +407,18 @@ class User implements UserInterface
         return $this;
     }
 
+    /**
+     * @return string|null
+     */
     public function getStatus(): ?string
     {
         return $this->status;
     }
 
+    /**
+     * @param string $status
+     * @return $this
+     */
     public function setStatus(string $status): self
     {
         $this->status = $status;
@@ -348,6 +434,10 @@ class User implements UserInterface
         return $this->notifications;
     }
 
+    /**
+     * @param Notification $notification
+     * @return $this
+     */
     public function addNotification(Notification $notification): self
     {
         if (!$this->notifications->contains($notification)) {
@@ -358,6 +448,10 @@ class User implements UserInterface
         return $this;
     }
 
+    /**
+     * @param Notification $notification
+     * @return $this
+     */
     public function removeNotification(Notification $notification): self
     {
         if ($this->notifications->contains($notification)) {
@@ -379,6 +473,10 @@ class User implements UserInterface
         return $this->notificationsUser;
     }
 
+    /**
+     * @param Notification $notificationsUser
+     * @return $this
+     */
     public function addNotificationsUser(Notification $notificationsUser): self
     {
         if (!$this->notificationsUser->contains($notificationsUser)) {
@@ -389,6 +487,10 @@ class User implements UserInterface
         return $this;
     }
 
+    /**
+     * @param Notification $notificationsUser
+     * @return $this
+     */
     public function removeNotificationsUser(Notification $notificationsUser): self
     {
         if ($this->notificationsUser->contains($notificationsUser)) {
@@ -400,5 +502,30 @@ class User implements UserInterface
         }
 
         return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function serialize()
+    {
+        return serialize(array(
+            $this->id,
+            $this->username,
+            $this->password,
+        ));
+    }
+
+
+    /**
+     * @param $serialized
+     */
+    public function unserialize($serialized)
+    {
+        list (
+            $this->id,
+            $this->username,
+            $this->password,
+            ) = unserialize($serialized, array('allowed_classes' => false));
     }
 }
