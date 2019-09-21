@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Entity\Customer;
-use App\Exception\ApiException;
 use App\Form\CustomerType;
 use App\Repository\CustomerRepository;
 use App\Service\Serializer;
