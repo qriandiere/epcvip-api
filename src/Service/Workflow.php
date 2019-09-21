@@ -3,6 +3,8 @@
 namespace App\Service;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Workflow\Registry;
 
@@ -43,14 +45,15 @@ class Workflow
     {
         $workflow = $this->registry->get($object);
         if (!in_array($transition, $workflow->getDefinition()->getTransitions()))
-            //@todo api exception
-//            return new JsonResponse(null, 400);
-            if (!$workflow->can($object, $transition))
-                //@todo api exception
-//            return new JsonResponse(null, 403);
-                if (!$this->security->isGranted($transition, $object))
-                    //@todo api exception
-
+            throw new HttpException(
+                JsonResponse::HTTP_BAD_REQUEST,
+                'Invalid transition'
+            );
+        if (!$workflow->can($object, $transition) or !$this->security->isGranted($transition, $object))
+            throw new HttpException(
+                JsonResponse::HTTP_FORBIDDEN,
+                'Transition forbidden'
+            );
         $workflow->apply($transition, $object);
         $this->em->persist($object);
         $this->em->flush();

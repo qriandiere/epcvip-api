@@ -66,8 +66,6 @@ class SampleFixtures extends Fixture
         'internet'
     ];
 
-    #@todo unit testing
-
     /**
      *
      */

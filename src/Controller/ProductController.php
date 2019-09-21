@@ -37,7 +37,10 @@ class ProductController extends AbstractController
         $this->denyAccessUnlessGranted('create', $product);
         $em->persist($product);
         $em->flush();
-        return new JsonResponse($product->getId(), JsonResponse::HTTP_OK);
+        return new JsonResponse(
+            $product->getId(),
+            JsonResponse::HTTP_OK
+        );
     }
 
     /**
@@ -104,7 +107,10 @@ class ProductController extends AbstractController
         $em = $this->getDoctrine()->getManager();
         $em->remove($product);
         $em->flush();
-        return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
+        return new JsonResponse(
+            null,
+            JsonResponse::HTTP_NO_CONTENT
+        );
     }
 
     /**

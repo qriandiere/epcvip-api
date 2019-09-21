@@ -8,6 +8,8 @@ use App\Repository\UserRepository;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Event\PreFlushEventArgs;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
 /**
@@ -69,7 +71,10 @@ class EntityListener
             $workflow = $registry->get($object);
             //@todo api exception
             if (!$workflow->can($object, self::WORKFLOW_TRANSITION_DELETED))
-                throw new \Exception('unauthorized_transition', 400);
+                throw new HttpException(
+                    JsonResponse::HTTP_FORBIDDEN,
+                    'Transition forbidden'
+                );
             $workflow->apply($object, self::WORKFLOW_TRANSITION_DELETED);
             $object
                 ->setDeletedAt(new \DateTime());
@@ -81,13 +86,13 @@ class EntityListener
     /**
      * @param OnFlushEventArgs $event
      * @throws \Doctrine\ORM\ORMException
-     * @throws \Exception
      */
     public function onFlush(OnFlushEventArgs $event)
     {
         $now = new \DateTime();
         $em = $event->getEntityManager();
         foreach ($event->getEntityManager()->getUnitOfWork()->getScheduledEntityInsertions() as $object) {
+            $author = $this->getUser($object);
             $object
                 ->setAuthor($author)
                 ->setCreatedAt($now)

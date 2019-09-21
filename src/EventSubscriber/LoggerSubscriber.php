@@ -72,7 +72,6 @@ class LoggerSubscriber implements EventSubscriberInterface
         $this->em->persist($this->log);
         $this->em->flush();
         $this->responseLogger->info($response);
-        //@todo Exception handling, see course in fav
     }
 
     /**

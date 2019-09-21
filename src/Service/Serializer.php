@@ -2,6 +2,8 @@
 
 namespace App\Service;
 
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
@@ -16,9 +18,6 @@ class Serializer
 {
     /** @var array */
     const SERIALIZATION_SUPPORTED_FORMAT = ['json'];
-    const EXCEPTION_CODES = [
-        'format_unsupported' => 1
-    ];
     /** @var \Symfony\Component\Serializer\Serializer $serializer */
     private $serializer;
 
@@ -70,13 +69,11 @@ class Serializer
      */
     public function serialize($data, array $groups, string $format = 'json')
     {
-        if (!in_array($format, self::SERIALIZATION_SUPPORTED_FORMAT)) {
-            //@todo API Exception
-            throw new \Exception(
-                "The format '$format'' is currently not supported by the serializer",
-                self::EXCEPTION_CODES['format_unsupported']
+        if (!in_array($format, self::SERIALIZATION_SUPPORTED_FORMAT))
+            throw new HttpException(
+                JsonResponse::HTTP_BAD_REQUEST,
+                "The format '$format' is currently not supported by the serializer",
             );
-        }
         //We always return the author of a record
         if (!isset($groups['user'])) $groups[] = 'user';
         return $this->serializer->serialize($data, $format, ['groups' => $groups]);
@@ -90,13 +87,11 @@ class Serializer
      */
     public function deserialize(string $data, string $format = 'json')
     {
-        if (!in_array($format, self::SERIALIZATION_SUPPORTED_FORMAT)) {
-            //@todo API Exception
-            throw new \Exception(
-                "The format '$format'' is currently not supported by the serializer",
-                self::EXCEPTION_CODES['format_unsupported']
+        if (!in_array($format, self::SERIALIZATION_SUPPORTED_FORMAT))
+            throw new HttpException(
+                JsonResponse::HTTP_BAD_REQUEST,
+                "The format '$format' is currently not supported by the serializer",
             );
-        }
         return $this->serializer->deserialize($data, $format, $format);
     }
 }

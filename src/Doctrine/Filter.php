@@ -11,9 +11,6 @@ use Doctrine\ORM\Query\Filter\SQLFilter;
  */
 class Filter extends SQLFilter
 {
-    /** @var string $targetEntity */
-    private $targetEntity;
-
     /**
      * @param ClassMetaData $targetEntity
      * @param string $targetTableAlias

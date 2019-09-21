@@ -11,16 +11,12 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Workflow\Registry;
 
 /**
  * @Route("/customer", name="customer")
  */
 class CustomerController extends AbstractController
 {
-    //@todo Unit testing
-    //@todo workflow
-
     /**
      * @param Serializer $serializer
      * @param Request $request
@@ -41,7 +37,10 @@ class CustomerController extends AbstractController
         $this->denyAccessUnlessGranted('create', $customer);
         $em->persist($customer);
         $em->flush();
-        return new JsonResponse($customer->getId(), JsonResponse::HTTP_OK);
+        return new JsonResponse(
+            $customer->getId(),
+            JsonResponse::HTTP_OK
+        );
     }
 
     /**
@@ -108,7 +107,10 @@ class CustomerController extends AbstractController
         $em = $this->getDoctrine()->getManager();
         $em->remove($customer);
         $em->flush();
-        return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
+        return new JsonResponse(
+            null,
+            JsonResponse::HTTP_NO_CONTENT
+        );
     }
 
     /**
