@@ -6,6 +6,7 @@ use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use function Couchbase\defaultDecoder;
 
 /**
  * Class EnumStatusExtendedType
@@ -44,7 +45,7 @@ class EnumStatusExtendedType extends Type
      */
     public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform)
     {
-        $statuses = implode(', ', self::STATUSES);
+        $statuses = "'" . implode("', '", self::STATUSES) . "'";
         return "ENUM($statuses)";
     }
 

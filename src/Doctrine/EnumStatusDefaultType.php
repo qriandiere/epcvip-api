@@ -38,7 +38,7 @@ class EnumStatusDefaultType extends Type
      */
     public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform)
     {
-        $statuses = implode(', ', self::STATUSES);
+        $statuses = "'" . implode("', '", self::STATUSES) . "'";
         return "ENUM($statuses)";
     }
 
