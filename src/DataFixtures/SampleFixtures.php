@@ -2,13 +2,15 @@
 
 namespace App\DataFixtures;
 
+use App\Doctrine\EnumStatusDefaultType;
+use App\Doctrine\EnumStatusExtendedType;
 use App\Entity\Customer;
 use App\Entity\Product;
 use App\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Security\Core\Encoder\PasswordEncoderInterface;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 /**
  * Class SampleFixtures
@@ -16,10 +18,14 @@ use Symfony\Component\Security\Core\Encoder\PasswordEncoderInterface;
  */
 class SampleFixtures extends Fixture
 {
-    /** @var PasswordEncoderInterface $passwordEncoder */
+
+    /** @var UserPasswordEncoderInterface $passwordEncoder */
     private $passwordEncoder;
     /** @var EntityManagerInterface $em */
     private $em;
+    /** @var \DateTime $now */
+    private $now;
+
     /**
      *
      */
@@ -67,6 +73,17 @@ class SampleFixtures extends Fixture
     ];
 
     /**
+     * SampleFixtures constructor.
+     * @param UserPasswordEncoderInterface $passwordEncoder
+     * @throws \Exception
+     */
+    public function __construct(UserPasswordEncoderInterface $passwordEncoder)
+    {
+        $this->passwordEncoder = $passwordEncoder;
+        $this->now = new \DateTime();
+    }
+
+    /**
      *
      */
     private function users()
@@ -102,12 +119,15 @@ class SampleFixtures extends Fixture
      */
     private function user(string $role, int $i)
     {
-        $password = $this->passwordEncoder->encodePassword(
-            'user_' . $i . '_password', 'epcvip'
-        );
         $user = (new User())
             ->setUsername('user_' . $role . '_' . $i)
             ->setRoles([$role])
+            ->setCreatedAt($this->now)
+            ->setStatus(EnumStatusDefaultType::STATUS_ACTIVE);
+        $password = $this->passwordEncoder->encodePassword(
+            $user, 'user_' . $i . '_password'
+        );
+        $user
             ->setPassword($password);
         $this->em->persist($user);
     }
@@ -124,7 +144,9 @@ class SampleFixtures extends Fixture
                 ->setDateOfBirth(new \DateTime($dateOfBirth))
                 ->setFirstName(self::FIRST_NAMES[rand(0, count(self::FIRST_NAMES))])
                 ->setLastName(self::LAST_NAMES[rand(0, count(self::FIRST_NAMES))])
-                ->setUuid("ecpvip-uuid-$i");
+                ->setUuid("ecpvip-uuid-$i")
+                ->setCreatedAt($this->now)
+                ->setStatus(EnumStatusExtendedType::STATUS_NEW);
             $this->em->persist($customer);
             $this->products($customer);
         }
@@ -142,7 +164,9 @@ class SampleFixtures extends Fixture
             $product = (new Product())
                 ->setName(self::PRODUCT_NAMES[rand(0, count(self::PRODUCT_NAMES))])
                 ->setIssn('issn-' . $group1 . '-' . $group2)
-                ->setCustomer($customer);
+                ->setCustomer($customer)
+                ->setCreatedAt($this->now)
+                ->setStatus(EnumStatusExtendedType::STATUS_NEW);
             $this->em->persist($product);
         }
     }

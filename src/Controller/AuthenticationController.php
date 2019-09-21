@@ -10,7 +10,6 @@ use App\Service\Token;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
@@ -40,7 +39,7 @@ class AuthenticationController extends AbstractController
     )
     {
         if ($request->getUser() === null or $request->getPassword() === null) {
-            throw new HttpException(
+            throw new ApiException(
                 JsonResponse::HTTP_BAD_REQUEST,
                 'Username or password missing'
             );
@@ -52,7 +51,7 @@ class AuthenticationController extends AbstractController
                 'Username or password invalid'
             );
         }
-        $authenticationToken = $tokenRepository->findOneBy(['user' => $user, 'type' => Token::AUTHENTICATION]);
+        $authenticationToken = $tokenRepository->findOneBy(['author' => $user, 'type' => Token::AUTHENTICATION]);
         if ($authenticationToken === null) $authenticationToken = $token->new($user, Token::AUTHENTICATION);
         return new JsonResponse(
             [

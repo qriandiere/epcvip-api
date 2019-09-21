@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Doctrine\EnumStatusDefaultType;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -81,7 +82,7 @@ class User implements UserInterface, \Serializable
      * @Groups({"user", "users"})
      * @ORM\Column(type="enum_status_default", length=10)
      */
-    private $status;
+    private $status = EnumStatusDefaultType::STATUS_NEW;
 
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\Notification", mappedBy="author")
@@ -94,6 +95,16 @@ class User implements UserInterface, \Serializable
     private $notificationsUser;
 
     /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="users")
+     */
+    private $author;
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\User", mappedBy="author", orphanRemoval=true)
+     */
+    private $users;
+
+    /**
      * User constructor.
      */
     public function __construct()
@@ -104,6 +115,7 @@ class User implements UserInterface, \Serializable
         $this->logs = new ArrayCollection();
         $this->notifications = new ArrayCollection();
         $this->notificationsUser = new ArrayCollection();
+        $this->users = new ArrayCollection();
     }
 
     /**
@@ -527,5 +539,48 @@ class User implements UserInterface, \Serializable
             $this->username,
             $this->password,
             ) = unserialize($serialized, array('allowed_classes' => false));
+    }
+
+    public function getAuthor(): ?self
+    {
+        return $this->author;
+    }
+
+    public function setAuthor(?self $author): self
+    {
+        $this->author = $author;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|User[]
+     */
+    public function getUsers(): Collection
+    {
+        return $this->users;
+    }
+
+    public function addUser(User $user): self
+    {
+        if (!$this->users->contains($user)) {
+            $this->users[] = $user;
+            $user->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUser(User $user): self
+    {
+        if ($this->users->contains($user)) {
+            $this->users->removeElement($user);
+            // set the owning side to null (unless already changed)
+            if ($user->getAuthor() === $this) {
+                $user->setAuthor(null);
+            }
+        }
+
+        return $this;
     }
 }

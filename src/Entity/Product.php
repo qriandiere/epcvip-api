@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Doctrine\EnumStatusDefaultType;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -29,7 +30,7 @@ class Product
      * @Groups({"product", "products"})
      * @ORM\Column(type="enum_status_extended", length=10)
      */
-    private $status;
+    private $status = EnumStatusDefaultType::STATUS_NEW;
 
     /**
      * @Groups({"product", "products"})

@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Doctrine\EnumStatusDefaultType;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -44,7 +45,7 @@ class Log
     /**
      * @ORM\Column(type="enum_status_default", length=10)
      */
-    private $status;
+    private $status = EnumStatusDefaultType::STATUS_NEW;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="logs")

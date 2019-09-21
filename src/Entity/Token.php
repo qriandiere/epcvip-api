@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Doctrine\EnumStatusDefaultType;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -22,7 +23,7 @@ class Token
     private $value;
 
     /**
-     * @ORM\Column(type="string", length=10)
+     * @ORM\Column(type="string", length=15)
      */
     private $type;
 
@@ -45,12 +46,12 @@ class Token
      * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="tokens")
      * @ORM\JoinColumn(nullable=false)
      */
-    private $user;
+    private $author;
 
     /**
      * @ORM\Column(type="enum_status_default", length=10)
      */
-    private $status;
+    private $status = EnumStatusDefaultType::STATUS_NEW;
 
     public function getId(): ?int
     {
@@ -117,26 +118,26 @@ class Token
         return $this;
     }
 
-    public function getUser(): ?User
-    {
-        return $this->user;
-    }
-
-    public function setUser(?User $user): self
-    {
-        $this->user = $user;
-
-        return $this;
-    }
-
-    public function getStatus(): ?string
+    public function getStatus()
     {
         return $this->status;
     }
 
-    public function setStatus(string $status): self
+    public function setStatus($status): self
     {
         $this->status = $status;
+
+        return $this;
+    }
+
+    public function getAuthor(): ?User
+    {
+        return $this->author;
+    }
+
+    public function setAuthor(?User $author): self
+    {
+        $this->author = $author;
 
         return $this;
     }

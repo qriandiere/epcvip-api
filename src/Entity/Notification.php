@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Doctrine\EnumStatusDefaultType;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -56,7 +57,7 @@ class Notification
     /**
      * @ORM\Column(type="enum_status_default", length=10)
      */
-    private $status;
+    private $status = EnumStatusDefaultType::STATUS_NEW;
 
     public function getId(): ?int
     {

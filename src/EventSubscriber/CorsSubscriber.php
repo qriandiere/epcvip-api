@@ -72,10 +72,13 @@ class CorsSubscriber implements EventSubscriberInterface
     public function onKernelException(ExceptionEvent $event)
     {
         $exception = $event->getException();
+        $code = $exception->getCode() === 0 ? 500 : $exception->getCode();
         $response = new JsonResponse([
             'message' => $exception->getMessage(),
-            'code' => $exception->getCode()
-        ], $exception->getCode());
+            'code' => $code,
+            'line' => $exception->getLine(),
+            'trace' => $exception->getTrace()
+        ], $code);
         $event->setResponse($response);
     }
 }

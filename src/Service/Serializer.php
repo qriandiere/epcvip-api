@@ -3,7 +3,7 @@
 namespace App\Service;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpKernel\Exception\HttpException;
+use App\Exception\ApiException;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
@@ -70,7 +70,7 @@ class Serializer
     public function serialize($data, array $groups, string $format = 'json')
     {
         if (!in_array($format, self::SERIALIZATION_SUPPORTED_FORMAT))
-            throw new HttpException(
+            throw new ApiException(
                 JsonResponse::HTTP_BAD_REQUEST,
                 "The format '$format' is currently not supported by the serializer"
             );
@@ -88,7 +88,7 @@ class Serializer
     public function deserialize(string $data, string $format = 'json')
     {
         if (!in_array($format, self::SERIALIZATION_SUPPORTED_FORMAT))
-            throw new HttpException(
+            throw new ApiException(
                 JsonResponse::HTTP_BAD_REQUEST,
                 "The format '$format' is currently not supported by the serializer"
             );

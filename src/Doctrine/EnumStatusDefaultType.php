@@ -5,7 +5,7 @@ namespace App\Doctrine;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpKernel\Exception\HttpException;
+use App\Exception\ApiException;
 
 /**
  * Class EnumStatusDefaultType
@@ -60,7 +60,7 @@ class EnumStatusDefaultType extends Type
     public function convertToDatabaseValue($value, AbstractPlatform $platform)
     {
         if (!in_array($value, self::STATUSES)) {
-            throw new HttpException(
+            throw new ApiException(
                 JsonResponse::HTTP_BAD_REQUEST,
                 'Invalid Status'
             );

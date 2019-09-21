@@ -23,6 +23,12 @@ class Filter extends SQLFilter
             $this->setParameter('deleted', EnumStatusDefaultType::STATUS_DELETED);
             $deleted = $this->getParameter('deleted');
             $filter = "$targetTableAlias.status != $deleted";
+            if($targetEntity->getName() === 'App\Entity\User'){
+                //Allow only active user
+                $this->setParameter('active', EnumStatusDefaultType::STATUS_ACTIVE);
+                $active = $this->getParameter(EnumStatusDefaultType::STATUS_ACTIVE);
+                $filter .= " AND $targetTableAlias.status = $active";
+            }
             return $filter;
         }
         return '';

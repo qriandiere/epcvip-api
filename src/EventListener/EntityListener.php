@@ -10,8 +10,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Event\PreFlushEventArgs;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpKernel\Exception\HttpException;
+use App\Exception\ApiException;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Workflow\Registry;
 
 /**
  * Class EntityListener
@@ -23,17 +24,21 @@ class EntityListener
     const WORKFLOW_TRANSITION_DELETED = 'delete';
     /* @var ContainerInterface $container */
     private $container;
+    /** @var Registry $registry */
+    private $registry;
     /** @var UserRepository $userRepository */
     private $userRepository;
 
     /**
      * EntityListener constructor.
      * @param ContainerInterface $container
+     * @param Registry $registry
      * @param UserRepository $userRepository
      */
-    public function __construct(ContainerInterface $container, UserRepository $userRepository)
+    public function __construct(ContainerInterface $container, Registry $registry, UserRepository $userRepository)
     {
         $this->container = $container;
+        $this->registry = $registry;
         $this->userRepository = $userRepository;
     }
 
@@ -67,33 +72,7 @@ class EntityListener
     public function preFlush(PreFlushEventArgs $event)
     {
         $em = $event->getEntityManager();
-        $registry = $this->container->get('workflow.registry');
-        // Soft delete : we don't want to delete record, so we will just mark them as deleted
-        // so they will be filtered out of all our queries by our doctrine filter
-        foreach ($em->getUnitOfWork()->getScheduledEntityDeletions() as $object) {
-            $workflow = $registry->get($object);
-            //@todo api exception
-            if (!$workflow->can($object, self::WORKFLOW_TRANSITION_DELETED))
-                throw new HttpException(
-                    JsonResponse::HTTP_FORBIDDEN,
-                    'Transition forbidden'
-                );
-            $workflow->apply($object, self::WORKFLOW_TRANSITION_DELETED);
-            $object
-                ->setDeletedAt(new \DateTime());
-            $em->merge($object);
-            $em->persist($object);
-        }
-    }
-
-    /**
-     * @param OnFlushEventArgs $event
-     * @throws \Doctrine\ORM\ORMException
-     */
-    public function onFlush(OnFlushEventArgs $event)
-    {
-        $now = new \DateTime();
-        $em = $event->getEntityManager();
+        $now =  new \DateTime();
         foreach ($event->getEntityManager()->getUnitOfWork()->getScheduledEntityInsertions() as $object) {
             $author = $this->getUser($object);
             if ($author !== null)
@@ -108,6 +87,21 @@ class EntityListener
         foreach ($event->getEntityManager()->getUnitOfWork()->getScheduledEntityUpdates() as $object) {
             $object
                 ->setUpdatedAt($now);
+            $em->merge($object);
+            $em->persist($object);
+        }
+        // Soft delete : we don't want to delete record, so we will just mark them as deleted
+        // so they will be filtered out of all our queries by our doctrine filter
+        foreach ($em->getUnitOfWork()->getScheduledEntityDeletions() as $object) {
+            $workflow = $this->registry->get($object);
+            if (!$workflow->can($object, self::WORKFLOW_TRANSITION_DELETED))
+                throw new ApiException(
+                    JsonResponse::HTTP_FORBIDDEN,
+                    'Transition forbidden'
+                );
+            $workflow->apply($object, self::WORKFLOW_TRANSITION_DELETED);
+            $object
+                ->setDeletedAt(new \DateTime());
             $em->merge($object);
             $em->persist($object);
         }
