@@ -24,13 +24,13 @@ class ProductRepository extends ServiceEntityRepository
      * @param \DateTime $updatedAt
      * @return Product[]
      */
-    public function findByStatusAndUpdatedAt(
+    public function findByStatusAndBeforeCreatedAt(
         string $status, \DateTime $updatedAt
     )
     {
         return $this->createQueryBuilder('p')
             ->where('p.status = :status')
-            ->andWhere('p.updatedAt >= :updated_at')
+            ->andWhere('p.updatedAt <= :updated_at')
             ->setParameters([
                 'status' => $status,
                 'updated_at' => $updatedAt

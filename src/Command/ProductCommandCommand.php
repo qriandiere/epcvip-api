@@ -19,9 +19,9 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  */
 class ProductCommandCommand extends Command
 {
-    /**
-     * @var string
-     */
+
+
+    /** @var string */
     protected static $defaultName = 'app:product:command';
     /** @var EntityManagerInterface $em */
     private $em;
@@ -29,6 +29,24 @@ class ProductCommandCommand extends Command
     private $productRepository;
     /** @var Notification $notification */
     private $notification;
+
+    /**
+     * ProductCommandCommand constructor.
+     * @param EntityManagerInterface $em
+     * @param ProductRepository $productRepository
+     * @param Notification $notification
+     */
+    public function __construct(
+        EntityManagerInterface $em,
+        ProductRepository $productRepository,
+        Notification $notification
+    )
+    {
+        $this->em = $em;
+        $this->productRepository = $productRepository;
+        $this->notification = $notification;
+        parent::__construct();
+    }
 
     /**
      *
@@ -62,7 +80,12 @@ class ProductCommandCommand extends Command
                 'Invalid status. Statuses accepted : ' .
                 implode(', ', EnumStatusExtendedType::STATUSES)
             );
-        $products = $this->productRepository->findByStatusAndUpdatedAt(
+        if ($status !== 'pending')
+            throw new InvalidArgumentException(
+                'We\'re sorry, for the moment the only status supported is ' .
+                EnumStatusExtendedType::STATUS_PENDING
+            );
+        $products = $this->productRepository->findByStatusAndBeforeCreatedAt(
             $status, new \DateTime('-7 days')
         );
         foreach ($products as $product) {
@@ -71,6 +94,8 @@ class ProductCommandCommand extends Command
                 Notification::PENDING_PRODUCT,
                 $product->getAuthor()
             );
+            $notification
+                ->setProduct($product);
             $this->em->persist($notification);
         }
         $this->em->flush();
@@ -78,8 +103,8 @@ class ProductCommandCommand extends Command
         $productString = $countProducts > 1 ? 'products' : 'product';
         $notificationString = $countProducts > 1 ? 'notifications' : 'notification';
         $io->success(
-            $countProducts > 0 ? 'No product match your criteria, so no notifications where sent' :
-                "$productString $notificationString where sent"
+            $countProducts === 0 ? 'No product match your criteria, so no notifications where sent' :
+                "$countProducts $productString $notificationString where sent"
         );
     }
 }
