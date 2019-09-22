@@ -1,0 +1,68 @@
+framework:
+    workflows:
+        default:
+            type: 'state_machine'
+            marking_store:
+                type: 'method'
+                property: 'status'
+            supports:
+                - App\Entity\User
+                - App\Entity\Log
+                - App\Entity\Token
+            initial_marking: new
+            places:
+                - new
+                - active
+                - inactive
+                - deleted
+            transitions:
+                submit:
+                    from: new
+                    to: active
+                deactivation:
+                    from: active
+                    to: inactive
+                activation:
+                    from: inactive
+                    to: active
+                delete:
+                    from: [new, active, inactive]
+                    to: deleted
+        extended:
+            type: 'state_machine'
+            marking_store:
+                type: 'method'
+                property: 'status'
+            supports:
+                - App\Entity\Customer
+                - App\Entity\Product
+            initial_marking: new
+            places:
+                - new
+                - pending
+                - in_review
+                - approved
+                - inactive
+                - deleted
+            transitions:
+                submit:
+                    from: new
+                    to: pending
+                reviewing:
+                    from: pending
+                    to: in_review
+                approval:
+                    from: in_review
+                    to: approved
+                disapproval:
+                    from: in_review
+                    to: pending
+                deactivation:
+                    from: approved
+                    to: inactive
+                activation:
+                    from: inactive
+                    to: approved
+                delete:
+                    from: [new, pending, in_review, approved, inactive]
+                    to: deleted

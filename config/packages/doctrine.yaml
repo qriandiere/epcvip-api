@@ -1,0 +1,30 @@
+doctrine:
+    dbal:
+        # configure these for your database server
+        driver: 'pdo_mysql'
+        server_version: '5.7'
+        charset: utf8mb4
+        default_table_options:
+            charset: utf8mb4
+            collate: utf8mb4_unicode_ci
+        url: '%env(resolve:DATABASE_URL)%'
+        mapping_types:
+            enum: string
+        types:
+            enum_status_default:  App\Doctrine\EnumStatusDefaultType
+            enum_status_extended:  App\Doctrine\EnumStatusExtendedType
+    orm:
+        auto_generate_proxy_classes: true
+        naming_strategy: app.naming_strategy
+        auto_mapping: true
+        filters:
+            deleted:
+                class: 'App\Doctrine\Filter'
+                enabled: true
+        mappings:
+            App:
+                is_bundle: false
+                type: annotation
+                dir: '%kernel.project_dir%/src/Entity'
+                prefix: 'App\Entity'
+                alias: App

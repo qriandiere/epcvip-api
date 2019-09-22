@@ -1,0 +1,57 @@
+<?php
+
+namespace App\Service;
+
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Exception\ApiException;
+use Symfony\Component\Security\Core\Security;
+use Symfony\Component\Workflow\Registry;
+
+/**
+ * Class Workflow
+ * @package App\Service
+ */
+class Workflow
+{
+    /** @var Security $security */
+    private $security;
+    /** @var Registry $registry */
+    private $registry;
+    /** @var EntityManagerInterface $em */
+    private $em;
+
+    /**
+     * Workflow constructor.
+     * @param Security $security
+     * @param Registry $registry
+     * @param EntityManagerInterface $em
+     */
+    public function __construct(Security $security, Registry $registry, EntityManagerInterface $em)
+    {
+        $this->security = $security;
+        $this->registry = $registry;
+        $this->em = $em;
+    }
+
+    /**
+     * @param string $transition
+     * @param $object
+     * @return mixed
+     */
+    public function transition(
+        string $transition, $object
+    )
+    {
+        $workflow = $this->registry->get($object);
+        if (!$workflow->can($object, $transition) or !$this->security->isGranted($transition, $object))
+            throw new ApiException(
+                JsonResponse::HTTP_FORBIDDEN,
+                'Transition forbidden'
+            );
+        $workflow->apply($object, $transition);
+        $this->em->persist($object);
+        $this->em->flush();
+        return $object;
+    }
+}

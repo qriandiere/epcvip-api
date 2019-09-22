@@ -7,3 +7,15 @@
 /var/
 /vendor/
 ###< symfony/framework-bundle ###
+###> phpstorm IDE ###
+.idea/*
+###< phpstorm IDE ###
+###> symfony/phpunit-bridge ###
+.phpunit
+.phpunit.result.cache
+/phpunit.xml
+###< symfony/phpunit-bridge ###
+
+###> symfony/web-server-bundle ###
+/.web-server-pid
+###< symfony/web-server-bundle ###

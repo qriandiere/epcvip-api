@@ -1,0 +1,20 @@
+monolog:
+    channels: ['request', 'response']
+    handlers:
+        main:
+            type: stream
+            path: "%kernel.logs_dir%/%kernel.environment%.log"
+            level: debug
+            channels: ["!event","!request","!response"]
+        console:
+            type: console
+            process_psr_3_messages: false
+            channels: ["!event", "!doctrine", "!console"]
+        request:
+            type: rotating_file
+            path: "%kernel.logs_dir%/%kernel.environment%_request.log"
+            channels: ['request']
+        response:
+            type: rotating_file
+            path: "%kernel.logs_dir%/%kernel.environment%_response.log"
+            channels: ['response']
