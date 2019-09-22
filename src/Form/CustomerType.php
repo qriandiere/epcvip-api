@@ -4,7 +4,6 @@ namespace App\Form;
 
 use App\Entity\Customer;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\BirthdayType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -13,6 +12,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Date;
 use Symfony\Component\Validator\Constraints\GreaterThan;
 use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Constraints\LessThanOrEqual;
 
 /**
  * Class CustomerType
@@ -43,7 +43,7 @@ class CustomerType extends AbstractType
                 'format' => 'yyyy-MM-dd',
                 'constraints' => [
                     new Date(),
-                    new GreaterThan('-18 years')
+                    new LessThanOrEqual('-18 years')
                 ]
             ])
             ->add('products', CollectionType::class, [
@@ -61,6 +61,7 @@ class CustomerType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Customer::class,
+            'csrf_protection' => false
         ]);
     }
 }

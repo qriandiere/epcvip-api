@@ -120,8 +120,9 @@ class SampleFixtures extends Fixture
      */
     private function user(string $role, int $i)
     {
+        $username = strtolower(str_replace('ROLE_', '', $role));
         $user = (new User())
-            ->setUsername('user_' . $role . '_' . $i)
+            ->setUsername($username . $i)
             ->setRoles([$role])
             ->setCreatedAt($this->now)
             ->setStatus(EnumStatusDefaultType::STATUS_ACTIVE);
@@ -149,7 +150,7 @@ class SampleFixtures extends Fixture
                 ->setFirstName(self::FIRST_NAMES[rand(0, count(self::FIRST_NAMES) - 1)])
                 ->setLastName(self::LAST_NAMES[rand(0, count(self::FIRST_NAMES) - 1)])
                 ->setCreatedAt($this->now)
-                ->setStatus(EnumStatusExtendedType::STATUS_NEW)
+                ->setStatus(EnumStatusExtendedType::STATUS_PENDING)
                 ->setAuthor($this->author);
             $this->em->persist($customer);
             $this->products($customer);
@@ -170,7 +171,7 @@ class SampleFixtures extends Fixture
                 ->setIssn('issn-' . $group1 . '-' . $group2)
                 ->setCustomer($customer)
                 ->setCreatedAt($this->now)
-                ->setStatus(EnumStatusExtendedType::STATUS_NEW)
+                ->setStatus(EnumStatusExtendedType::STATUS_PENDING)
                 ->setAuthor($this->author);
             $this->em->persist($product);
         }

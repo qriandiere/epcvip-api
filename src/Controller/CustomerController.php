@@ -4,8 +4,10 @@ namespace App\Controller;
 
 use App\Doctrine\EnumStatusExtendedType;
 use App\Entity\Customer;
+use App\Exception\ApiException;
 use App\Form\CustomerType;
 use App\Repository\CustomerRepository;
+use App\Repository\ProductRepository;
 use App\Service\Serializer;
 use App\Service\Workflow;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -20,12 +22,13 @@ class CustomerController extends AbstractController
 {
     /**
      * @param Request $request
+     * @param ProductRepository $productRepository
      * @return JsonResponse
-     * @throws \Exception
      * @Route("", name="new", methods={"POST"})
      */
     public function new(
-        Request $request
+        Request $request,
+        ProductRepository $productRepository
     )
     {
         $em = $this->getDoctrine()->getManager();
@@ -33,11 +36,21 @@ class CustomerController extends AbstractController
         $customer = new Customer();
         $form = $this->createForm(CustomerType::class, $customer);
         $form->submit($data);
+        if (!$form->isValid())
+            throw new ApiException(
+                JsonResponse::HTTP_BAD_REQUEST,
+                $form->getErrors(true)
+            );
         $this->denyAccessUnlessGranted('create', $customer);
         //When we create a new customer, it is already set in pending status
         $customer
             ->setStatus(EnumStatusExtendedType::STATUS_PENDING);
         foreach ($customer->getProducts() as $product) {
+            if ($productRepository->findOneBy(['issn' => $product->getIssn()]) === null)
+                throw new ApiException(
+                    400,
+                    'A product with this issn already exist'
+                );
             $product
                 ->setStatus(EnumStatusExtendedType::STATUS_PENDING);
         }
@@ -53,6 +66,7 @@ class CustomerController extends AbstractController
      * @param Serializer $serializer
      * @param Customer $customer
      * @param Request $request
+     * @param ProductRepository $productRepository
      * @return JsonResponse
      * @throws \Exception
      * @Route("/{id}", name="edit", methods={"PUT"}, requirements={"id": "\d+"})
@@ -60,7 +74,8 @@ class CustomerController extends AbstractController
     public function edit(
         Serializer $serializer,
         Customer $customer,
-        Request $request
+        Request $request,
+        ProductRepository $productRepository
     )
     {
         $em = $this->getDoctrine()->getManager();
@@ -68,6 +83,13 @@ class CustomerController extends AbstractController
         $form = $this->createForm(CustomerType::class, $customer);
         $form->submit($data);
         $this->denyAccessUnlessGranted('edit', $customer);
+        foreach ($customer->getProducts() as $product) {
+            if ($productRepository->findOneBy(['issn' => $product->getIssn()]) === null)
+                throw new ApiException(
+                    400,
+                    'A product with this issn already exist'
+                );
+        }
         $em->persist($customer);
         $em->flush();
         return new JsonResponse(
