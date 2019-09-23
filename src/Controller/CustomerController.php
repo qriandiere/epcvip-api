@@ -63,19 +63,15 @@ class CustomerController extends AbstractController
     }
 
     /**
-     * @param Serializer $serializer
      * @param Customer $customer
      * @param Request $request
-     * @param ProductRepository $productRepository
      * @return JsonResponse
      * @throws \Exception
      * @Route("/{id}", name="edit", methods={"PUT"}, requirements={"id": "\d+"})
      */
     public function edit(
-        Serializer $serializer,
         Customer $customer,
-        Request $request,
-        ProductRepository $productRepository
+        Request $request
     )
     {
         $em = $this->getDoctrine()->getManager();
@@ -86,7 +82,7 @@ class CustomerController extends AbstractController
         $em->persist($customer);
         $em->flush();
         return new JsonResponse(
-            $serializer->serialize($customer, ['customer', 'products']),
+            $customer->getId(),
             JsonResponse::HTTP_OK
         );
     }
