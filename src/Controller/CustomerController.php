@@ -46,7 +46,7 @@ class CustomerController extends AbstractController
         $customer
             ->setStatus(EnumStatusExtendedType::STATUS_PENDING);
         foreach ($customer->getProducts() as $product) {
-            if ($productRepository->findOneBy(['issn' => $product->getIssn()]) === null)
+            if ($productRepository->findOneBy(['issn' => $product->getIssn()]) !== null)
                 throw new ApiException(
                     400,
                     'A product with this issn already exist'
@@ -63,19 +63,15 @@ class CustomerController extends AbstractController
     }
 
     /**
-     * @param Serializer $serializer
      * @param Customer $customer
      * @param Request $request
-     * @param ProductRepository $productRepository
      * @return JsonResponse
      * @throws \Exception
      * @Route("/{id}", name="edit", methods={"PUT"}, requirements={"id": "\d+"})
      */
     public function edit(
-        Serializer $serializer,
         Customer $customer,
-        Request $request,
-        ProductRepository $productRepository
+        Request $request
     )
     {
         $em = $this->getDoctrine()->getManager();
@@ -83,17 +79,10 @@ class CustomerController extends AbstractController
         $form = $this->createForm(CustomerType::class, $customer);
         $form->submit($data);
         $this->denyAccessUnlessGranted('edit', $customer);
-        foreach ($customer->getProducts() as $product) {
-            if ($productRepository->findOneBy(['issn' => $product->getIssn()]) === null)
-                throw new ApiException(
-                    400,
-                    'A product with this issn already exist'
-                );
-        }
         $em->persist($customer);
         $em->flush();
         return new JsonResponse(
-            $serializer->serialize($customer, ['customer', 'products']),
+            $customer->getId(),
             JsonResponse::HTTP_OK
         );
     }
