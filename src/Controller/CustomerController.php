@@ -46,7 +46,7 @@ class CustomerController extends AbstractController
         $customer
             ->setStatus(EnumStatusExtendedType::STATUS_PENDING);
         foreach ($customer->getProducts() as $product) {
-            if ($productRepository->findOneBy(['issn' => $product->getIssn()]) === null)
+            if ($productRepository->findOneBy(['issn' => $product->getIssn()]) !== null)
                 throw new ApiException(
                     400,
                     'A product with this issn already exist'
@@ -83,13 +83,6 @@ class CustomerController extends AbstractController
         $form = $this->createForm(CustomerType::class, $customer);
         $form->submit($data);
         $this->denyAccessUnlessGranted('edit', $customer);
-        foreach ($customer->getProducts() as $product) {
-            if ($productRepository->findOneBy(['issn' => $product->getIssn()]) === null)
-                throw new ApiException(
-                    400,
-                    'A product with this issn already exist'
-                );
-        }
         $em->persist($customer);
         $em->flush();
         return new JsonResponse(
